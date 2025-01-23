@@ -205,6 +205,321 @@
 
 // export default InvoicesPage;
 
+// import React, { useEffect, useState } from "react";
+// import {
+//   Table,
+//   Button,
+//   Space,
+//   Typography,
+//   Modal,
+//   Form,
+//   Input,
+//   InputNumber,
+//   message,
+//   Select,
+// } from "antd";
+// import {
+//   PlusOutlined,
+//   FilePdfOutlined,
+//   MinusCircleOutlined,
+// } from "@ant-design/icons";
+// import {
+//   fetchInvoices,
+//   addInvoice,
+//   deleteInvoice,
+//   updateInvoice,
+//   fetchProducts,
+// } from "../services/api";
+// import { Invoice, InvoiceProduct, Product } from "../utils/types";
+
+// const { Title } = Typography;
+// const { Option } = Select;
+
+// // Types
+
+// const InvoicesPage: React.FC = () => {
+//   const [invoices, setInvoices] = useState<Invoice[]>([]);
+//   const [products, setProducts] = useState<Product[]>([]);
+//   const [loading, setLoading] = useState(false);
+//   const [isModalVisible, setIsModalVisible] = useState(false);
+//   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+
+//   const [form] = Form.useForm();
+
+//   const loadInvoices = async () => {
+//     setLoading(true);
+//     try {
+//       const data = await fetchInvoices();
+//       const formattedData = data.map((invoice) => ({
+//         ...invoice,
+//         // clientName: invoice.clientName || "Unknown Client",
+
+//         totalAmount: invoice.products.reduce(
+//           (sum: number, product) => sum + product.quantity * product.rate,
+//           0
+//         ),
+//         createdAt: invoice.createdAt || new Date().toISOString(),
+//       }));
+//       setInvoices(formattedData as Invoice[]);
+//     } catch (error) {
+//       console.error("An error occurred:", error);
+//       message.error("Failed to fetch invoices.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const loadProducts = async () => {
+//     try {
+//       const data = await fetchProducts();
+//       setProducts(data);
+//     } catch (error) {
+//       console.error("An error occurred:", error);
+//       message.error("Failed to fetch products.");
+//     }
+//   };
+
+//   useEffect(() => {
+//     loadInvoices();
+//     loadProducts();
+//   }, []);
+
+//   const handleFinish = async (values: Invoice) => {
+//     try {
+//       if (editingInvoice) {
+//         await updateInvoice(editingInvoice.id, values);
+//         message.success("Invoice updated successfully!");
+//       } else {
+//         await addInvoice(values);
+//         message.success("Invoice added successfully!");
+//       }
+//       loadInvoices();
+//       setIsModalVisible(false);
+//       form.resetFields();
+//     } catch (error) {
+//       console.error("An error occurred:", error);
+//       message.error("Failed to save invoice.");
+//     }
+//   };
+
+//   const handleDelete = async (invoiceId: string) => {
+//     try {
+//       await deleteInvoice(invoiceId);
+//       message.success("Invoice deleted successfully!");
+//       loadInvoices();
+//     } catch (error) {
+//       console.error("An error occurred:", error);
+//       message.error("Failed to delete invoice.");
+//     }
+//   };
+
+//   const openModal = (invoice: Invoice | null = null) => {
+//     setEditingInvoice(invoice);
+//     setIsModalVisible(true);
+//     if (invoice) {
+//       form.setFieldsValue(invoice);
+//     }
+//   };
+
+//   const columns = [
+//     { title: "No.", dataIndex: "id", key: "id" },
+//     { title: "Invoice Name", dataIndex: "invoiceName", key: "invoiceName" },
+//     {
+//       title: "Products",
+//       dataIndex: "products",
+//       key: "products",
+//       render: (products: InvoiceProduct[]) =>
+//         products.map((product, index) => (
+//           <div key={index}>
+//             {product.productName} (x{product.quantity}) - $
+//             {product.rate.toFixed(2)}
+//           </div>
+//         )),
+//     },
+//     {
+//       title: "Total",
+//       dataIndex: "products",
+//       key: "total",
+//       render: (products: InvoiceProduct[]) =>
+//         `$${products
+//           .reduce((sum, product) => sum + product.quantity * product.rate, 0)
+//           .toFixed(2)}`,
+//     },
+//     {
+//       title: "Created At",
+//       dataIndex: "createdAt",
+//       key: "createdAt",
+//       render: (createdAt: string) =>
+//         new Date(createdAt).toLocaleDateString("en-US", {
+//           year: "numeric",
+//           month: "long",
+//           day: "numeric",
+//         }),
+//     },
+//     {
+//       title: "Status",
+//       dataIndex: "status",
+//       key: "status",
+//       render: (status: string) => (
+//         <span style={{ color: status === "Paid" ? "green" : "red" }}>
+//           {status}
+//         </span>
+//       ),
+//     },
+//     {
+//       title: "Actions",
+//       key: "actions",
+//       render: (_: unknown, record: Invoice) => (
+//         <Space size="middle">
+//           <Button type="link" onClick={() => openModal(record)}>
+//             Edit
+//           </Button>
+//           <Button type="link" danger onClick={() => handleDelete(record.id)}>
+//             Delete
+//           </Button>
+//         </Space>
+//       ),
+//     },
+//   ];
+
+//   return (
+//     <div>
+//       <div
+//         style={{
+//           marginBottom: "16px",
+//           display: "flex",
+//           justifyContent: "space-between",
+//         }}
+//       >
+//         <Title level={4}>List of Invoices</Title>
+//         <Space>
+//           <Button icon={<FilePdfOutlined />} type="default">
+//             PDF
+//           </Button>
+//           <Button
+//             type="primary"
+//             icon={<PlusOutlined />}
+//             onClick={() => openModal()}
+//           >
+//             Add Invoice
+//           </Button>
+//         </Space>
+//       </div>
+//       <Table
+//         columns={columns}
+//         dataSource={invoices}
+//         loading={loading}
+//         rowKey="id"
+//         pagination={{ pageSize: 5 }}
+//       />
+//       <Modal
+//         title={editingInvoice ? "Edit Invoice" : "Add Invoice"}
+//         open={isModalVisible}
+//         onCancel={() => {
+//           setIsModalVisible(false);
+//           form.resetFields();
+//         }}
+//         onOk={() => form.submit()}
+//       >
+//         <Form form={form} layout="vertical" onFinish={handleFinish}>
+//           <Form.List
+//             name="products"
+//             initialValue={editingInvoice?.products || []}
+//           >
+//             {(fields, { add, remove }) => (
+//               <>
+//                 {fields.map(({ key, name, ...restField }) => (
+//                   <Space
+//                     key={key}
+//                     style={{ display: "flex", marginBottom: 8 }}
+//                     align="baseline"
+//                   >
+//                     <Form.Item
+//                       {...restField}
+//                       name={[name, "productId"]}
+//                       rules={[
+//                         { required: true, message: "Product is required!" },
+//                       ]}
+//                     >
+//                       <Select
+//                         placeholder="Select Product"
+//                         onChange={(value) => {
+//                           const selectedProduct = products.find(
+//                             (product) => product.id === value
+//                           );
+//                           if (selectedProduct) {
+//                             form.setFieldValue(
+//                               [name, "productName"],
+//                               selectedProduct.productName
+//                             );
+//                             form.setFieldValue(
+//                               [name, "rate"],
+//                               selectedProduct.rate
+//                             );
+//                           }
+//                         }}
+//                       >
+//                         {products.map((product) => (
+//                           <Option key={product.id} value={product.id}>
+//                             {product.productName}
+//                           </Option>
+//                         ))}
+//                       </Select>
+//                     </Form.Item>
+//                     <Form.Item
+//                       {...restField}
+//                       name={[name, "productName"]}
+//                       hidden
+//                     >
+//                       <Input />
+//                     </Form.Item>
+//                     <Form.Item
+//                       {...restField}
+//                       name={[name, "quantity"]}
+//                       rules={[
+//                         { required: true, message: "Quantity is required!" },
+//                       ]}
+//                     >
+//                       <InputNumber placeholder="Quantity" min={1} />
+//                     </Form.Item>
+//                     <Form.Item
+//                       {...restField}
+//                       name={[name, "rate"]}
+//                       rules={[{ required: true, message: "Rate is required!" }]}
+//                     >
+//                       <InputNumber placeholder="Rate" min={0} readOnly />
+//                     </Form.Item>
+//                     <MinusCircleOutlined onClick={() => remove(name)} />
+//                   </Space>
+//                 ))}
+//                 <Form.Item>
+//                   <Button
+//                     type="dashed"
+//                     onClick={() => add()}
+//                     block
+//                     icon={<PlusOutlined />}
+//                   >
+//                     Add Product
+//                   </Button>
+//                 </Form.Item>
+//               </>
+//             )}
+//           </Form.List>
+//           <Form.Item
+//             name="status"
+//             label="Status"
+//             rules={[{ required: true, message: "Please enter the status!" }]}
+//           >
+//             <Input placeholder="e.g., Paid or Unpaid" />
+//           </Form.Item>
+//         </Form>
+//       </Modal>
+//     </div>
+//   );
+// };
+
+// export default InvoicesPage;
+
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -230,12 +545,10 @@ import {
   updateInvoice,
   fetchProducts,
 } from "../services/api";
-import { Invoice, InvoiceProduct, Product } from "../utils/types";
+import { Invoice, Product } from "../utils/types";
 
 const { Title } = Typography;
 const { Option } = Select;
-
-// Types
 
 const InvoicesPage: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -250,17 +563,15 @@ const InvoicesPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await fetchInvoices();
-      const formattedData = data.map((invoice) => ({
+      const formattedData = data.map((invoice: Invoice) => ({
         ...invoice,
-        clientName: invoice.clientName || "Unknown Client",
-
         totalAmount: invoice.products.reduce(
-          (sum: number, product) => sum + product.quantity * product.rate,
+          (sum, product) => sum + product.stock * product.price,
           0
         ),
         createdAt: invoice.createdAt || new Date().toISOString(),
       }));
-      setInvoices(formattedData as Invoice[]);
+      setInvoices(formattedData);
     } catch (error) {
       console.error("An error occurred:", error);
       message.error("Failed to fetch invoices.");
@@ -323,15 +634,16 @@ const InvoicesPage: React.FC = () => {
 
   const columns = [
     { title: "No.", dataIndex: "id", key: "id" },
+    { title: "Invoice Name", dataIndex: "invoiceName", key: "invoiceName" },
     {
       title: "Products",
       dataIndex: "products",
       key: "products",
-      render: (products: InvoiceProduct[]) =>
+      render: (products: Product[]) =>
         products.map((product, index) => (
           <div key={index}>
-            {product.productName} (x{product.quantity}) - $
-            {product.rate.toFixed(2)}
+            {product.productName} (x{product.stock}) - $
+            {product.price.toFixed(2)}
           </div>
         )),
     },
@@ -339,9 +651,9 @@ const InvoicesPage: React.FC = () => {
       title: "Total",
       dataIndex: "products",
       key: "total",
-      render: (products: InvoiceProduct[]) =>
+      render: (products: Product[]) =>
         `$${products
-          .reduce((sum, product) => sum + product.quantity * product.rate, 0)
+          .reduce((sum, product) => sum + product.stock * product.price, 0)
           .toFixed(2)}`,
     },
     {
@@ -360,7 +672,7 @@ const InvoicesPage: React.FC = () => {
       dataIndex: "status",
       key: "status",
       render: (status: string) => (
-        <span style={{ color: status === "Paid" ? "green" : "red" }}>
+        <span style={{ color: status === "paid" ? "green" : "red" }}>
           {status}
         </span>
       ),
@@ -413,7 +725,7 @@ const InvoicesPage: React.FC = () => {
       />
       <Modal
         title={editingInvoice ? "Edit Invoice" : "Add Invoice"}
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);
           form.resetFields();
@@ -421,6 +733,13 @@ const InvoicesPage: React.FC = () => {
         onOk={() => form.submit()}
       >
         <Form form={form} layout="vertical" onFinish={handleFinish}>
+          <Form.Item
+            name="invoiceName"
+            label="Invoice Name"
+            rules={[{ required: true, message: "Invoice name is required!" }]}
+          >
+            <Input placeholder="Enter invoice name" />
+          </Form.Item>
           <Form.List
             name="products"
             initialValue={editingInvoice?.products || []}
@@ -448,12 +767,12 @@ const InvoicesPage: React.FC = () => {
                           );
                           if (selectedProduct) {
                             form.setFieldValue(
-                              [name, "productName"],
+                              [name, "name"],
                               selectedProduct.productName
                             );
                             form.setFieldValue(
-                              [name, "rate"],
-                              selectedProduct.rate
+                              [name, "price"],
+                              selectedProduct.price
                             );
                           }
                         }}
@@ -465,28 +784,20 @@ const InvoicesPage: React.FC = () => {
                         ))}
                       </Select>
                     </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, "productName"]}
-                      hidden
-                    >
+                    <Form.Item {...restField} name={[name, "name"]} hidden>
                       <Input />
                     </Form.Item>
                     <Form.Item
                       {...restField}
-                      name={[name, "quantity"]}
+                      name={[name, "stock"]}
                       rules={[
                         { required: true, message: "Quantity is required!" },
                       ]}
                     >
                       <InputNumber placeholder="Quantity" min={1} />
                     </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, "rate"]}
-                      rules={[{ required: true, message: "Rate is required!" }]}
-                    >
-                      <InputNumber placeholder="Rate" min={0} readOnly />
+                    <Form.Item {...restField} name={[name, "price"]}>
+                      <InputNumber placeholder="Price" min={0} readOnly />
                     </Form.Item>
                     <MinusCircleOutlined onClick={() => remove(name)} />
                   </Space>
@@ -509,7 +820,11 @@ const InvoicesPage: React.FC = () => {
             label="Status"
             rules={[{ required: true, message: "Please enter the status!" }]}
           >
-            <Input placeholder="e.g., Paid or Unpaid" />
+            <Select placeholder="Select status">
+              <Option value="paid">Paid</Option>
+              <Option value="unpaid">Unpaid</Option>
+              <Option value="overdue">Overdue</Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

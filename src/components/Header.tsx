@@ -57,28 +57,60 @@
 // };
 
 // export default CustomHeader;
+// import React from "react";
+// import { Layout } from "antd";
+
+// const { Header } = Layout;
+
+// const CustomHeader: React.FC = () => {
+//   return (
+//     <Header
+//       style={{
+//         background: "lightgrey",
+//         display: "flex",
+//         justifyContent: "center",
+//         alignItems: "center",
+//         height: "64px",
+//       }}
+//     >
+//       <h3
+//         style={{
+//           margin: 0,
+//           color: "#000",
+//           fontWeight: "bold",
+//           fontSize: "18px",
+//         }}
+//       >
+//         Invoice Management System
+//       </h3>
+//     </Header>
+//   );
+// };
+
 import React from "react";
 import { Layout } from "antd";
 
 const { Header } = Layout;
 
+// Custom Header Component
 const CustomHeader: React.FC = () => {
   return (
     <Header
       style={{
-        background: "lightgrey",
+        backgroundColor: "#001529", // Unified dark background
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         height: "64px",
+        color: "#ffffff",
       }}
     >
       <h3
         style={{
           margin: 0,
-          color: "#000",
+          color: "#ffffff", // White text for contrast
           fontWeight: "bold",
-          fontSize: "18px",
+          fontSize: "20px",
         }}
       >
         Invoice Management System

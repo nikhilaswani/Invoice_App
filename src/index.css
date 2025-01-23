@@ -1,5 +1,5 @@
-/* src/index.css */
-body {
+
+/* body {
   margin: 0;
   font-family: 'Arial', sans-serif;
   background-color: #f0f2f5;
@@ -24,4 +24,28 @@ body {
 .ant-btn-primary {
   background-color: #1890ff;
   border-color: #1890ff;
+}
+ */
+
+ body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f2f5; /* Unified app background */
+}
+
+.ant-layout-header {
+  background-color: #001529; /* Unified header background */
+}
+
+.ant-menu-dark {
+  background-color: #001529; /* Sidebar menu background */
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: #1890ff; /* Highlight color for selected item */
+}
+
+.ant-btn-primary {
+  background-color: #1890ff;
+  border-color: #1890ff; /* Primary button color */
 }

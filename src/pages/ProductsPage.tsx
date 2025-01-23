@@ -207,15 +207,6 @@ import { Product } from "../utils/types";
 
 const { Title } = Typography;
 
-// interface Product {
-//   id: string;
-//   name: string;
-//   category: string;
-//   price: number;
-//   stock: number;
-//   createdAt: string;
-// }
-
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -243,7 +234,7 @@ const ProductsPage: React.FC = () => {
   }, []);
 
   // Add or update a product
-  // eslint-disable-next-line
+
   const handleFinish = async (values: Product | null) => {
     try {
       if (editingProduct) {
@@ -354,7 +345,7 @@ const ProductsPage: React.FC = () => {
       />
       <Modal
         title={editingProduct ? "Edit Product" : "Add Product"}
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);
           form.resetFields();
